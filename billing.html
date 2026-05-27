@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Billing</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>💳 Billing</h1>
+    <section class="panel">
+      <h2>🧾 Billing Entry</h2>
+      <form class="form-grid" id="billingForm">
+        <label>Patient<select id="patient_id" required></select></label>
+        <label>Billing Date<input id="billing_date" type="date" required></label>
+        <label>Amount<input id="total_amount" type="number" step="0.01" placeholder="1500" required></label>
+        <label>Status<select id="status"><option>Paid</option><option>Pending</option></select></label>
+        <button class="btn btn-dark wide" type="submit">✅ Save Bill</button>
+      </form>
+    </section>
+    <section class="panel">
+      <h2>💰 Billing Records</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Bill ID</th><th>Patient</th><th>Date</th><th>Amount</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody id="billingBody"></tbody>
+        </table>
+      </div>
+      <a class="btn btn-outline" href="admin-dashboard.html">← Back to Dashboard</a>
+    </section>
+  </main>
+  <script>
+    const API_URL = "http://localhost:3000";
+
+    async function loadPatients() {
+      const response = await fetch(`${API_URL}/patients`);
+      const patients = await response.json();
+
+      document.getElementById("patient_id").innerHTML = patients.map((patient) => (
+        `<option value="${patient.patient_id}">${patient.first_name} ${patient.last_name}</option>`
+      )).join("");
+    }
+
+    async function loadBilling() {
+      const response = await fetch(`${API_URL}/billing`);
+      const bills = await response.json();
+
+      document.getElementById("billingBody").innerHTML = bills.map((bill) => `
+        <tr>
+          <td>${bill.billing_id}</td>
+          <td>${bill.patient_first_name} ${bill.patient_last_name}</td>
+          <td>${bill.billing_date ? new Date(bill.billing_date).toLocaleDateString() : ""}</td>
+          <td>${bill.total_amount}</td>
+          <td>${bill.status || ""}</td>
+          <td><button class="mini warn" type="button">Edit</button></td>
+        </tr>
+      `).join("");
+    }
+
+    document.getElementById("billingForm").addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const billData = {
+        patient_id: document.getElementById("patient_id").value,
+        billing_date: document.getElementById("billing_date").value,
+        total_amount: document.getElementById("total_amount").value,
+        status: document.getElementById("status").value
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/billing`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(billData)
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Failed to save bill");
+
+        alert(result.message);
+        this.reset();
+        await loadPatients();
+        await loadBilling();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    loadPatients().catch((error) => alert(error.message));
+    loadBilling().catch((error) => alert(error.message));
+  </script>
+</body>
+</html>

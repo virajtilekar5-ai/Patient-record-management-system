@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointments</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>📅 Appointments</h1>
+    <section class="panel">
+      <h2>🗓️ Schedule Appointment</h2>
+      <form class="form-grid" id="appointmentForm">
+        <label>Select Patient<select id="patient_id" required></select></label>
+        <label>Select Doctor<select id="doctor_id" required></select></label>
+        <label>Date<input id="appointment_date" type="date" required></label>
+        <label>Time<input id="appointment_time" type="time" required></label>
+        <label>Status<select id="status"><option>Pending</option><option>Confirmed</option><option>Completed</option><option>Cancelled</option></select></label>
+        <label class="wide">Reason<input id="notes" type="text" placeholder="Regular checkup"></label>
+        <button class="btn btn-dark wide" type="submit">✅ Save Appointment</button>
+      </form>
+    </section>
+    <section class="panel">
+      <h2>📌 Appointment Records</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody id="appointmentsBody"></tbody>
+        </table>
+      </div>
+      <a class="btn btn-outline" href="admin-dashboard.html">← Back to Dashboard</a>
+    </section>
+  </main>
+  <script>
+    const API_URL = "http://localhost:3000";
+
+    async function loadSelectOptions() {
+      const [patientsResponse, doctorsResponse] = await Promise.all([
+        fetch(`${API_URL}/patients`),
+        fetch(`${API_URL}/doctors`)
+      ]);
+
+      const patients = await patientsResponse.json();
+      const doctors = await doctorsResponse.json();
+
+      document.getElementById("patient_id").innerHTML = patients.map((patient) => (
+        `<option value="${patient.patient_id}">${patient.first_name} ${patient.last_name}</option>`
+      )).join("");
+
+      document.getElementById("doctor_id").innerHTML = doctors.map((doctor) => (
+        `<option value="${doctor.doctor_id}">Dr. ${doctor.first_name} ${doctor.last_name}</option>`
+      )).join("");
+    }
+
+    async function loadAppointments() {
+      const response = await fetch(`${API_URL}/appointments`);
+      const appointments = await response.json();
+
+      document.getElementById("appointmentsBody").innerHTML = appointments.map((appointment) => {
+        const date = new Date(appointment.appointment_date);
+        return `
+          <tr>
+            <td>${appointment.appointment_id}</td>
+            <td>${appointment.patient_first_name} ${appointment.patient_last_name}</td>
+            <td>Dr. ${appointment.doctor_first_name} ${appointment.doctor_last_name}</td>
+            <td>${date.toLocaleDateString()}</td>
+            <td>${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td>
+            <td>${appointment.status || ""}</td>
+            <td><button class="mini warn" type="button">Edit</button></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    document.getElementById("appointmentForm").addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const appointmentData = {
+        patient_id: document.getElementById("patient_id").value,
+        doctor_id: document.getElementById("doctor_id").value,
+        appointment_date: `${document.getElementById("appointment_date").value} ${document.getElementById("appointment_time").value}:00`,
+        status: document.getElementById("status").value,
+        notes: document.getElementById("notes").value.trim()
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/appointments`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(appointmentData)
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Failed to save appointment");
+
+        alert(result.message);
+        this.reset();
+        await loadSelectOptions();
+        await loadAppointments();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    loadSelectOptions().catch((error) => alert(error.message));
+    loadAppointments().catch((error) => alert(error.message));
+  </script>
+</body>
+</html>

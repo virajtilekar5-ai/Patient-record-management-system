@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <strong>🙂 Patient Panel</strong>
+    <span>Welcome, <b id="patientName">Patient</b> | <a href="index.html">Logout</a></span>
+  </header>
+
+  <main class="container">
+    <h1>📊 Patient Dashboard</h1>
+    <section class="dashboard-grid patient-grid">
+      <article class="dash-card">
+        <h2>📋 Medical Records</h2>
+        <p>View diagnosis and treatment</p>
+        <a class="btn btn-dark" href="medical-records.html">Open →</a>
+      </article>
+      <article class="dash-card">
+        <h2>📅 Appointments</h2>
+        <p>View appointment status</p>
+        <a class="btn btn-dark" href="appointments.html">Open →</a>
+      </article>
+      <article class="dash-card">
+        <h2>💳 Billing Report</h2>
+        <p>View invoices and payment</p>
+        <a class="btn btn-dark" href="billing.html">Open →</a>
+      </article>
+    </section>
+  </main>
+  <script>
+    const patient = JSON.parse(localStorage.getItem("patient") || "null");
+
+    if (patient) {
+      document.getElementById("patientName").textContent = `${patient.first_name} ${patient.last_name}`;
+    }
+  </script>
+</body>
+</html>

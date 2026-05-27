@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <strong>🏥 Hospital Patient Record Management System</strong>
+    <span>Welcome, <b>Admin</b> | <a href="index.html">Logout</a></span>
+  </header>
+
+  <main class="container">
+    <h1>📊 Admin Dashboard</h1>
+    <section class="dashboard-grid">
+      <article class="dash-card">
+        <h2>➕ Add Patient</h2>
+        <p><span id="patientsCount">0</span> patients in database</p>
+        <a class="btn btn-dark" href="add-patient.html">Open →</a>
+      </article>
+      <article class="dash-card">
+        <h2>👥 View Patients</h2>
+        <p>Patient list and details</p>
+        <a class="btn btn-dark" href="viewpatients.html">Open →</a>
+      </article>
+      <article class="dash-card">
+        <h2>🩺 Add Doctor</h2>
+        <p>Register doctor profile</p>
+        <a class="btn btn-dark" href="add-doctor.html">Open →</a>
+      </article>
+      <article class="dash-card">
+        <h2>👨‍⚕️ View Doctors</h2>
+        <p><span id="doctorsCount">0</span> doctors in database</p>
+        <a class="btn btn-dark" href="viewdoctors.html">Open →</a>
+      </article>
+      <article class="dash-card">
+        <h2>📅 Appointments</h2>
+        <p><span id="appointmentsCount">0</span> appointments in database</p>
+        <a class="btn btn-dark" href="appointments.html">Open →</a>
+      </article>
+      <article class="dash-card">
+        <h2>📋 Medical Records</h2>
+        <p>Diagnosis and treatment notes</p>
+        <a class="btn btn-dark" href="medical-records.html">Open →</a>
+      </article>
+      <article class="dash-card">
+        <h2>💊 Prescriptions</h2>
+        <p>Medicine records</p>
+        <a class="btn btn-dark" href="prescriptions1.html">Open →</a>
+      </article>
+      <article class="dash-card">
+        <h2>💳 Billing</h2>
+        <p><span id="billingCount">0</span> bills in database</p>
+        <a class="btn btn-dark" href="billing.html">Open →</a>
+      </article>
+      <article class="dash-card">
+        <h2>📑 Patient Report</h2>
+        <p>View complete patient summary</p>
+        <a class="btn btn-dark" href="patientreport.html">Open →</a>
+      </article>
+    </section>
+  </main>
+  <script>
+    async function loadDashboardStats() {
+      const response = await fetch("http://localhost:3000/dashboard-stats");
+      const stats = await response.json();
+
+      document.getElementById("patientsCount").textContent = stats.patients;
+      document.getElementById("doctorsCount").textContent = stats.doctors;
+      document.getElementById("appointmentsCount").textContent = stats.appointments;
+      document.getElementById("billingCount").textContent = stats.billing;
+    }
+
+    loadDashboardStats().catch(() => {
+      document.getElementById("patientsCount").textContent = "-";
+      document.getElementById("doctorsCount").textContent = "-";
+      document.getElementById("appointmentsCount").textContent = "-";
+      document.getElementById("billingCount").textContent = "-";
+    });
+  </script>
+</body>
+</html>

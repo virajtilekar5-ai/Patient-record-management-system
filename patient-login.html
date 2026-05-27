@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Login</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page split-auth">
+  <main class="login-card">
+    <h1>🙂 Patient Login</h1>
+    <form id="patientLoginForm">
+      <input id="identifier" type="text" placeholder="Patient ID / Email" required>
+      <input id="password" type="password" placeholder="Password" required>
+      <button class="btn btn-primary" type="submit">🔐 Login</button>
+    </form>
+    <a class="text-link" href="index.html">← Back</a>
+  </main>
+  <script>
+    document.getElementById("patientLoginForm").addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      try {
+        const response = await fetch("http://localhost:3000/patient-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            identifier: document.getElementById("identifier").value.trim(),
+            password: document.getElementById("password").value
+          })
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Login failed");
+
+        localStorage.setItem("patient", JSON.stringify(result.patient));
+        window.location.href = "patient-dashboard.html";
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+  </script>
+</body>
+</html>

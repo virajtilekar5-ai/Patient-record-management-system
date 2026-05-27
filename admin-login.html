@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page split-auth">
+  <main class="login-card">
+    <h1>🛡️ Admin Login</h1>
+    <form id="adminLoginForm">
+      <input id="username" type="text" placeholder="Username / Email" required>
+      <input id="password" type="password" placeholder="Password" required>
+      <button class="btn btn-dark" type="submit">🔐 Login</button>
+    </form>
+    <a class="text-link" href="index.html">← Back</a>
+  </main>
+  <script>
+    document.getElementById("adminLoginForm").addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      try {
+        const response = await fetch("http://localhost:3000/admin-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: document.getElementById("username").value.trim(),
+            password: document.getElementById("password").value
+          })
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Login failed");
+
+        window.location.href = "admin-dashboard.html";
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+  </script>
+</body>
+</html>

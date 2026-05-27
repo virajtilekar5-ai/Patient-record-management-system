@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Patients</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>👥 View Patients</h1>
+    <section class="panel">
+      <h2>📋 Patient List</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Name</th><th>DOB</th><th>Gender</th><th>Email</th><th>Phone</th><th>Action</th></tr>
+          </thead>
+          <tbody id="patientsBody"></tbody>
+        </table>
+      </div>
+      <a class="btn btn-outline" href="admin-dashboard.html">← Back to Dashboard</a>
+    </section>
+  </main>
+  <script>
+    async function loadPatients() {
+      const response = await fetch("http://localhost:3000/patients");
+      const patients = await response.json();
+
+      document.getElementById("patientsBody").innerHTML = patients.map((patient) => `
+        <tr>
+          <td>${patient.patient_id}</td>
+          <td>${patient.first_name} ${patient.last_name}</td>
+          <td>${patient.date_of_birth ? new Date(patient.date_of_birth).toLocaleDateString() : ""}</td>
+          <td>${patient.gender || ""}</td>
+          <td>${patient.email || ""}</td>
+          <td>${patient.contact_number || ""}</td>
+          <td><button class="mini warn" type="button">Edit</button><button class="mini danger" type="button">Delete</button></td>
+        </tr>
+      `).join("");
+    }
+
+    loadPatients().catch((error) => alert(error.message));
+  </script>
+</body>
+</html>

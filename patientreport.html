@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Report</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>📑 Patient Report</h1>
+    <section class="panel">
+      <h2>📊 Complete Patient Report</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Patient</th>
+              <th>Department</th>
+              <th>Doctor</th>
+              <th>Diagnosis</th>
+              <th>Appointment</th>
+              <th>Bill Status</th>
+            </tr>
+          </thead>
+          <tbody id="patientReportBody"></tbody>
+        </table>
+      </div>
+      <a class="btn btn-outline" href="admin-dashboard.html">← Back to Dashboard</a>
+    </section>
+  </main>
+
+  <script>
+    async function loadPatientReport() {
+      const response = await fetch("http://localhost:3000/patient-report");
+      const reports = await response.json();
+
+      document.getElementById("patientReportBody").innerHTML = reports.map((report) => `
+        <tr>
+          <td>${report.patient_name || ""}</td>
+          <td>${report.department_name || ""}</td>
+          <td>${report.doctor_name ? `Dr. ${report.doctor_name}` : ""}</td>
+          <td>${report.diagnosis || ""}</td>
+          <td>${report.appointment_date ? new Date(report.appointment_date).toLocaleDateString() : ""}</td>
+          <td>${report.bill_status || ""}</td>
+        </tr>
+      `).join("");
+    }
+
+    loadPatientReport().catch((error) => alert(error.message));
+  </script>
+</body>
+</html>

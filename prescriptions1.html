@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prescriptions</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>💊 Prescriptions</h1>
+
+    <section class="panel">
+      <h2>🧪 Add Prescription</h2>
+      <form class="form-grid" id="prescriptionForm">
+        <label>Medical Record<select id="record_id" required></select></label>
+        <label>Medicine Name<input id="medication_name" type="text" required></label>
+        <label>Generic Name<input id="generic_name" type="text"></label>
+        <label>Category<input id="category" type="text" placeholder="Tablet"></label>
+        <label>Price<input id="price" type="number" step="0.01" placeholder="100"></label>
+        <label>Dosage<input id="dosage" type="text" placeholder="500mg" required></label>
+        <label>Frequency<input id="frequency" type="text" placeholder="Twice daily" required></label>
+        <label>Duration Days<input id="duration_days" type="number" required></label>
+        <button class="btn btn-dark wide" type="submit">✅ Save Prescription</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>📚 Prescription Records</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Patient</th>
+              <th>Doctor</th>
+              <th>Medicine</th>
+              <th>Dosage</th>
+              <th>Frequency</th>
+              <th>Days</th>
+            </tr>
+          </thead>
+          <tbody id="prescriptionsBody"></tbody>
+        </table>
+      </div>
+      <a class="btn btn-outline" href="admin-dashboard.html">← Back to Dashboard</a>
+    </section>
+  </main>
+
+  <script>
+    const API_URL = "http://localhost:3000";
+
+    async function loadMedicalRecordOptions() {
+      const response = await fetch(`${API_URL}/medical-records`);
+      const records = await response.json();
+
+      document.getElementById("record_id").innerHTML = records.map((record) => `
+        <option value="${record.record_id}">
+          #${record.record_id} - ${record.patient_first_name} ${record.patient_last_name} / Dr. ${record.doctor_first_name} ${record.doctor_last_name}
+        </option>
+      `).join("");
+    }
+
+    async function loadPrescriptions() {
+      const response = await fetch(`${API_URL}/prescriptions`);
+      const prescriptions = await response.json();
+
+      document.getElementById("prescriptionsBody").innerHTML = prescriptions.map((prescription) => `
+        <tr>
+          <td>${prescription.prescription_id}</td>
+          <td>${prescription.patient_first_name} ${prescription.patient_last_name}</td>
+          <td>Dr. ${prescription.doctor_first_name} ${prescription.doctor_last_name}</td>
+          <td>${prescription.medication_name}</td>
+          <td>${prescription.dosage}</td>
+          <td>${prescription.frequency}</td>
+          <td>${prescription.duration_days}</td>
+        </tr>
+      `).join("");
+    }
+
+    document.getElementById("prescriptionForm").addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const prescriptionData = {
+        record_id: document.getElementById("record_id").value,
+        medication_name: document.getElementById("medication_name").value.trim(),
+        generic_name: document.getElementById("generic_name").value.trim(),
+        category: document.getElementById("category").value.trim(),
+        price: document.getElementById("price").value,
+        dosage: document.getElementById("dosage").value.trim(),
+        frequency: document.getElementById("frequency").value.trim(),
+        duration_days: document.getElementById("duration_days").value
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/prescriptions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(prescriptionData)
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Failed to save prescription");
+
+        alert(result.message);
+        this.reset();
+        await loadMedicalRecordOptions();
+        await loadPrescriptions();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    loadMedicalRecordOptions().catch((error) => alert(error.message));
+    loadPrescriptions().catch((error) => alert(error.message));
+  </script>
+</body>
+</html>

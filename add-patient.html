@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Patient</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>➕ Add Patient</h1>
+    <section class="panel">
+      <h2>🧾 Patient Details</h2>
+      <form class="form-grid" id="addPatientForm">
+        <label>First Name<input id="first_name" type="text" required></label>
+        <label>Last Name<input id="last_name" type="text" required></label>
+        <label>Date of Birth<input id="date_of_birth" type="date"></label>
+        <label>Gender<select id="gender"><option>Male</option><option>Female</option><option>Other</option></select></label>
+        <label>Phone<input id="contact_number" type="tel"></label>
+        <label>Email<input id="email" type="email"></label>
+        <label>Emergency Contact<input id="emergency_contact" type="tel"></label>
+        <label class="wide">Address<input id="address" type="text"></label>
+        <button class="btn btn-dark wide" type="submit">✅ Add Patient</button>
+        <a class="btn btn-outline wide" href="admin-dashboard.html">← Back to Dashboard</a>
+      </form>
+    </section>
+  </main>
+  <script>
+    document.getElementById("addPatientForm").addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const patientData = {
+        first_name: document.getElementById("first_name").value.trim(),
+        last_name: document.getElementById("last_name").value.trim(),
+        date_of_birth: document.getElementById("date_of_birth").value,
+        gender: document.getElementById("gender").value,
+        contact_number: document.getElementById("contact_number").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        address: document.getElementById("address").value.trim(),
+        emergency_contact: document.getElementById("emergency_contact").value.trim()
+      };
+
+      try {
+        const response = await fetch("http://localhost:3000/patients", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(patientData)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "Failed to add patient");
+        }
+
+        alert(result.message);
+        this.reset();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+  </script>
+</body>
+</html>

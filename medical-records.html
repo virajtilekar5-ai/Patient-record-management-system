@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Records</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>📋 Medical Records</h1>
+    <section class="panel">
+      <h2>📝 Add Medical Record</h2>
+      <form class="form-grid" id="medicalRecordForm">
+        <label>Select Patient<select id="patient_id" required></select></label>
+        <label>Doctor<select id="doctor_id" required></select></label>
+        <label>Record Date<input id="record_date" type="date" required></label>
+        <label class="wide">Chief Complaint / Notes<textarea id="chief_complaint" rows="4"></textarea></label>
+        <button class="btn btn-dark wide" type="submit">✅ Save Record</button>
+      </form>
+    </section>
+    <section class="panel">
+      <h2>📚 Medical Record List</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Patient</th><th>Doctor</th><th>Chief Complaint</th><th>Date</th><th>Action</th></tr>
+          </thead>
+          <tbody id="medicalRecordsBody"></tbody>
+        </table>
+      </div>
+      <a class="btn btn-outline" href="admin-dashboard.html">← Back to Dashboard</a>
+    </section>
+  </main>
+  <script>
+    const API_URL = "http://localhost:3000";
+
+    async function loadSelectOptions() {
+      const [patientsResponse, doctorsResponse] = await Promise.all([
+        fetch(`${API_URL}/patients`),
+        fetch(`${API_URL}/doctors`)
+      ]);
+
+      const patients = await patientsResponse.json();
+      const doctors = await doctorsResponse.json();
+
+      document.getElementById("patient_id").innerHTML = patients.map((patient) => (
+        `<option value="${patient.patient_id}">${patient.first_name} ${patient.last_name}</option>`
+      )).join("");
+
+      document.getElementById("doctor_id").innerHTML = doctors.map((doctor) => (
+        `<option value="${doctor.doctor_id}">Dr. ${doctor.first_name} ${doctor.last_name}</option>`
+      )).join("");
+    }
+
+    async function loadMedicalRecords() {
+      const response = await fetch(`${API_URL}/medical-records`);
+      const records = await response.json();
+
+      document.getElementById("medicalRecordsBody").innerHTML = records.map((record) => `
+        <tr>
+          <td>${record.record_id}</td>
+          <td>${record.patient_first_name} ${record.patient_last_name}</td>
+          <td>Dr. ${record.doctor_first_name} ${record.doctor_last_name}</td>
+          <td>${record.chief_complaint || ""}</td>
+          <td>${record.record_date ? new Date(record.record_date).toLocaleDateString() : ""}</td>
+          <td><button class="mini warn" type="button">Edit</button></td>
+        </tr>
+      `).join("");
+    }
+
+    document.getElementById("medicalRecordForm").addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const recordData = {
+        patient_id: document.getElementById("patient_id").value,
+        doctor_id: document.getElementById("doctor_id").value,
+        record_date: document.getElementById("record_date").value,
+        chief_complaint: document.getElementById("chief_complaint").value.trim()
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/medical-records`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(recordData)
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Failed to save medical record");
+
+        alert(result.message);
+        this.reset();
+        await loadSelectOptions();
+        await loadMedicalRecords();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    loadSelectOptions().catch((error) => alert(error.message));
+    loadMedicalRecords().catch((error) => alert(error.message));
+  </script>
+</body>
+</html>

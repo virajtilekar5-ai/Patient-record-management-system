@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Doctors</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>👨‍⚕️ View Doctors</h1>
+    <section class="panel">
+      <h2>🩺 Doctor List</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Doctor</th><th>Department</th><th>Specialization</th><th>Phone</th><th>Action</th></tr>
+          </thead>
+          <tbody id="doctorsBody"></tbody>
+        </table>
+      </div>
+      <a class="btn btn-outline" href="admin-dashboard.html">← Back to Dashboard</a>
+    </section>
+  </main>
+  <script>
+    async function loadDoctors() {
+      const response = await fetch("http://localhost:3000/doctors");
+      const doctors = await response.json();
+
+      document.getElementById("doctorsBody").innerHTML = doctors.map((doctor) => `
+        <tr>
+          <td>${doctor.doctor_id}</td>
+          <td>Dr. ${doctor.first_name} ${doctor.last_name}</td>
+          <td>${doctor.department_name || doctor.department_id || ""}</td>
+          <td>${doctor.specialization || ""}</td>
+          <td>${doctor.contact_number || ""}</td>
+          <td><button class="mini warn" type="button">Edit</button><button class="mini danger" type="button">Delete</button></td>
+        </tr>
+      `).join("");
+    }
+
+    loadDoctors().catch((error) => alert(error.message));
+  </script>
+</body>
+</html>

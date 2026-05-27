@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hospital Patient Record Management System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+  <main class="auth-shell">
+    <section class="choice-card">
+      <h1>🏥 Hospital Record System</h1>
+      <p>Choose your login panel</p>
+      <p id="backendStatus">🔄 Checking backend connection...</p>
+      <a class="btn btn-dark" href="admin-login.html">🛡️ Admin Login</a>
+      <a class="btn btn-primary" href="patient-login.html">🙂 Patient Login</a>
+      <p id="databaseSummary"></p>
+    </section>
+  </main>
+  <script>
+    async function readJsonResponse(response) {
+      const contentType = response.headers.get("content-type") || "";
+
+      if (!contentType.includes("application/json")) {
+        throw new Error("Server is running old code. Stop it and run node server.js again.");
+      }
+
+      return response.json();
+    }
+
+    async function checkBackendConnection() {
+      const backendStatus = document.getElementById("backendStatus");
+      const databaseSummary = document.getElementById("databaseSummary");
+
+      try {
+        const dbResponse = await fetch("/test-db");
+        const dbResult = await readJsonResponse(dbResponse);
+
+        if (!dbResponse.ok) {
+          throw new Error(dbResult.error || "Backend is running, but MySQL is not connected");
+        }
+
+        backendStatus.textContent = dbResult.message;
+
+        const statsResponse = await fetch("/dashboard-stats");
+        const stats = await readJsonResponse(statsResponse);
+
+        if (statsResponse.ok) {
+          databaseSummary.textContent = `${stats.patients} patients | ${stats.doctors} doctors | ${stats.appointments} appointments`;
+        }
+      } catch (error) {
+        backendStatus.textContent = error.message || "Backend/MySQL not connected. Start server.js first.";
+        databaseSummary.textContent = "";
+      }
+    }
+
+    checkBackendConnection();
+  </script>
+</body>
+</html>
